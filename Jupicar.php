@@ -1,15 +1,34 @@
 <?php
 
+namespace App\Libraries;
+
 class Jupicar
 {
 
     public function __construct()
     {
-        $this->api = new \SoapClient("https://jupicar.cloud:1409/ws/reservation.wsdl", array(
-            "login" => 'username@username.com',
-            'password' => 'YOURPASSWORD',
-        ));
+        @libxml_disable_entity_loader(false);
+        $soapClientOptions = array(
+            'login' => 'edsbilisim@nissan-bayi.com',
+            'password' => 'edsbilisim123',
+            'cache_wsdl'     => WSDL_CACHE_NONE,
+            'trace'          => 1,
+            'stream_context' => stream_context_create(
+                [
+                    'ssl' => [
+                        'verify_peer'       => false,
+                        'verify_peer_name'  => false,
+                        'allow_self_signed' => true
+                    ]
+                ]
+            )
+        );
+        //Test
+        //$this->api = new \SoapClient("https://jupicar.cloud:1409/ws/reservation.wsdl", $soapClientOptions);
+        //Live
+        $this->api = new \SoapClient("https://jupicar.cloud:2034/ws/reservation.wsdl", $soapClientOptions);
     }
+
 
     /**
      * brokerLogin
@@ -68,20 +87,25 @@ class Jupicar
      */
     public function Campaigns($pickupLocNo = "", $pickupDate = "", $returnLocNo = "", $returnDate = "", $tariffNo = "")
     {
+
         try {
             $Campaigns  = $this->api->Campaigns(array(
                 "pickupLocNo" => $pickupLocNo,
                 "pickupDate" => $pickupDate,
                 "returnLocNo" => $returnLocNo,
                 "returnDate" => $returnDate,
-                "tariffNo" => $tariffNo
+                "tariffNo" => $tariffNo,
             ));
-            if (isset($Campaigns->Campaigns)) {
+
+
+
+            if (isset($Campaigns->campaigns)) {
                 return array(
                     "status" => true,
-                    "data" => $Campaigns->Campaigns,
+                    "data" => $Campaigns->campaigns,
                 );
             } else {
+
                 return array(
                     "status" => false,
                     "data" => "",
@@ -89,6 +113,8 @@ class Jupicar
                 );
             }
         } catch (\Throwable $th) {
+            var_dump($th);
+            die;
             return array(
                 "status" => false,
                 "data" => "",
@@ -151,22 +177,26 @@ class Jupicar
      *
      * @return array
      */
-    public function Capacities($pickupLocNo  = "", $pickupDate  = "", $returnLocNo  = "", $returnDate  = "", $classNos  = "", $tariffNo  = "", $campaignNo  = "", $language  = "")
+    public function Capacities($pickupLocNo  = "", $pickupDate  = "", $returnLocNo  = "", $returnDate  = "", $classNos  = "", $tariffNo  = "", $campaignNo  = "", $language  = "TR")
     {
         try {
-            $Capacities  = $this->api->Capacities(array(
+            $req = array(
                 "pickupLocNo" => $pickupLocNo,
                 "pickupDate" => $pickupDate,
                 "returnLocNo" => $returnLocNo,
+                "returnDate" => $returnDate,
                 "classNos" => $classNos,
-                "tariffNo" => $tariffNo,
+                "tariffNos" => $tariffNo,
                 "campaignNo" => $campaignNo,
                 "language" => $language,
-            ));
-            if (isset($Capacities->Capacities)) {
+            );
+
+            $Capacities  = $this->api->Capacities($req);
+
+            if (isset($Capacities->capacities)) {
                 return array(
                     "status" => true,
-                    "data" => $Capacities->Capacities,
+                    "data" => $Capacities->capacities,
                 );
             } else {
                 return array(
@@ -358,7 +388,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -383,16 +413,18 @@ class Jupicar
      *
      * @return array
      */
-    public function extraProducts($rentalDays, $tariffNo, $campaignNo, $classNo, $language = "TR")
+    public function extraProducts($rentalDays = "", $tariffNo = "", $campaignNo = "", $classNo = "", $language = "TR")
     {
         try {
-            $extraProducts   = $this->api->ExtraProducts(array(
+            $req = array(
                 "rentalDays" => $rentalDays,
                 "tariffNo" => $tariffNo,
                 "campaignNo" => $campaignNo,
                 "classNo" => $classNo,
                 "language" => $language,
-            ));
+            );
+
+            $extraProducts   = $this->api->ExtraProducts($req);
             if (isset($extraProducts->extraProducts)) {
                 return array(
                     "status" => true,
@@ -402,7 +434,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -441,7 +473,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -478,7 +510,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -519,7 +551,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -559,7 +591,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -596,7 +628,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -626,16 +658,16 @@ class Jupicar
                 "language" => $language,
                 "cityName" => $cityName,
             ));
-            if (isset($Locations->Locations)) {
+            if (isset($Locations->locations)) {
                 return array(
                     "status" => true,
-                    "data" => $Locations->Locations,
+                    "data" => $Locations->locations,
                 );
             } else {
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -672,7 +704,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -724,7 +756,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -768,7 +800,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -802,7 +834,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -840,7 +872,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -884,7 +916,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -919,7 +951,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -958,7 +990,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -995,7 +1027,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -1033,7 +1065,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -1056,10 +1088,11 @@ class Jupicar
     public function vehicleClasses($language = "TR")
     {
         try {
-
             $vehicleClasses   = $this->api->vehicleClasses(array(
                 "language" => $language,
             ));
+
+
             if (isset($vehicleClasses->vehicleClasses)) {
                 return array(
                     "status" => true,
@@ -1069,7 +1102,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -1091,13 +1124,14 @@ class Jupicar
      *
      * @return array
      */
-    public function vehicleTypeDetails($language = "TR", $typeNo)
+    public function vehicleTypeDetails($typeNo = "", $language = "TR")
     {
         try {
 
             $vehicleTypeDetails   = $this->api->vehicleTypeDetails(array(
-                "language" => $language,
-                "typeNo" => $typeNo
+                "typeNo" => $typeNo,
+                "language" => $language
+
             ));
             if (isset($vehicleTypeDetails->vehicleTypeDetails)) {
                 return array(
@@ -1108,7 +1142,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -1144,7 +1178,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
@@ -1180,7 +1214,7 @@ class Jupicar
                 return array(
                     "status" => false,
                     "data" => "",
-                    "message" => "Jupicar API Hatası yada boş veri döndü",
+                    "message" => "Jupicar API Hatası ya da boş veri döndü",
                 );
             }
         } catch (\Throwable $th) {
