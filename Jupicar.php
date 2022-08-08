@@ -9,8 +9,8 @@ class Jupicar
     {
         @libxml_disable_entity_loader(false);
         $soapClientOptions = array(
-            'login' => 'edsbilisim@nissan-bayi.com',
-            'password' => 'edsbilisim123',
+            'login' => 'user@user',
+            'password' => 'password',
             'cache_wsdl'     => WSDL_CACHE_NONE,
             'trace'          => 1,
             'stream_context' => stream_context_create(
@@ -23,10 +23,9 @@ class Jupicar
                 ]
             )
         );
-        //Test
-        //$this->api = new \SoapClient("https://jupicar.cloud:1409/ws/reservation.wsdl", $soapClientOptions);
-        //Live
-        $this->api = new \SoapClient("https://jupicar.cloud:2034/ws/reservation.wsdl", $soapClientOptions);
+        
+        $this->api = new \SoapClient("https://jupicar.cloud:1409/ws/reservation.wsdl", $soapClientOptions);
+       
     }
 
 
